@@ -5,7 +5,7 @@
         this.options = {
             url: options.url,
             nowPage:  1, // 当前页码
-            pageNum: options.pageNum, // 总页码
+            pageNum: 2, // 总页码
             canJump:  0, // 是否能跳转。0=不显示（默认），1=显示
             showOne:  1,//只有一页时，是否显示。0=不显示,1=显示（默认）
             callback: options.callback , // 回调函数
@@ -19,7 +19,9 @@
             dataBox:'' //返回数据存放html的id或者class
         };
         $.extend(this.options,options);
+
         this.init();
+        $("#nowPageAjaxInit").click();//第一次刷新加载数据
     }
     Paging.prototype =  {
         constructor : Paging,
@@ -44,15 +46,14 @@
                 return '';
             }
             content.push("<ul>");
+            content.push("<li id='firstPage' >首页：1</li>")
             content.push("<li class='xl-prevPage'>上一页</li>");
             //页面总数小于等于当前要展示页数总数，展示所有页面
-            content.push("<li>首页：</li>")
-            content.push("<li>"+1+"</li>")
-            content.push("<li>当前：</li>")
-            content.push("<li>"+nowPage+"</li>")
-            content.push("<li>尾页：</li>")
-            content.push("<li>"+pageNum+"</li>")
+
+            content.push("<li id='nowPageAjaxInit'> "+nowPage+"</li>")
+
             content.push("<li class='xl-nextPage'>下一页</li>");
+            content.push("<li id='lastPage'>尾页："+pageNum+"</li>")
             if(canJump){
                 content.push("<li class='xl-jumpText xl-disabled'>跳转到<input type='number' id='xlJumpNum'>页</li>");
                 content.push("<li class='xl-jumpButton'>确定</li>");
@@ -70,11 +71,14 @@
             me.element.off('click', 'li');
             me.element.on('click', 'li', function () {
                 var cla = $(this).attr('class');
+                var id=$(this).attr('id');
                 var num = parseInt($(this).html());
                 var nowPage = me.options.nowPage;
                 if( $(this).hasClass('xl-disabled') || cla === 'xl-jumpText'){
                     return '';
                 }
+
+
                 if (cla == 'xl-prevPage') {
                     if (nowPage !== 1) {
                         me.options.nowPage -= 1;
@@ -84,10 +88,26 @@
                         me.options.nowPage += 1;
                     }
                 }else if(cla == 'xl-jumpButton'){
-                    me.options.nowPage = Number($('#xlJumpNum').val());
+                    var jumpNum=Number($('#xlJumpNum').val());
+                    if (jumpNum<1||jumpNum>me.options.pageNum){
+                        alert("页码错误");
+                        return ;
+                    }
+                    me.options.nowPage =  jumpNum;
+
                 }else{
                     me.options.nowPage = num;
                 }
+
+                //首页尾页判断
+                if(id=='firstPage'){
+                    me.options.nowPage=1;
+
+                }else if(id=='lastPage'){
+                    me.options.nowPage=me.options.pageNum;
+                }
+
+
                 me.createHtml();
 
                 var datajson;//返回查询数据
@@ -102,22 +122,28 @@
                         search3:me.options.search3,
                         search4:me.options.search4,
                         search5:me.options.search5,
-                        nowPage:me.options.nowPage,
+                        pageNum:me.options.nowPage,//对应pageHelper的参数pageNum为当前页码
                         pageSize:me.options.pageSize
                     },
                     beforeSend:function(){
 
                     },
                     success:function(data){
-                        var b = JSON.stringify(data);//即数据
+                        var pages=data.total; //pageHelp的pageInfo的数据中的总页码数
+                        me.options.pageNum=pages;//更新总页码数
+                        //请求成功后，更新总页码
+                        $("#lastPage").text("尾页："+pages);//页码渲染
+
+                        var b = JSON.stringify(data);//即数据 此时转换成了json字符串
                         datajson=b;
                         if(me.options.dataBox==''){
                             // alert("当前dataBox为空")
                         }else {
-                            var idbox=me.options.dataBox;
-                            $(idbox).text(b);
+                            //不建议在此处使用渲染
+                            // 渲染方法
+                            //var idbox=me.options.dataBox;
+                            //$(idbox).text(b);
                         }
-
                         if (me.options.callback) {
                             if(datajson==null){
                                 me.options.callback("无数据");
@@ -138,7 +164,8 @@
             var pageNum = me.options.pageNum;
             if (nowPage == 1) {
                 me.element.children().children('.xl-prevPage').addClass('xl-disabled');
-            } else if (nowPage == pageNum) {
+            }
+            if (nowPage == pageNum) {
                 me.element.children().children('.xl-nextPage').addClass('xl-disabled');
             }
         }
