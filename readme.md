@@ -1,3 +1,5 @@
+### pageAjax
+
 #### 1. 说明
 
 该插件是基于 [link](https://www.jq22.com/jquery-info22105)  插件 进行开发 ，因为 我对前端插件了解不多，在针对自己的项目需求上对 [link]( https://www.jq22.com/jquery-info22105)资源的学习与参考下，整合完善出符合自己需求的插件 。 相对于原来插件内容上删除了页面按钮等部分内容，增加了ajax异步查询后台数据并返回前台的功能。[参考项目link](// https://www.jq22.com/jquery-info22105), 参考项目作者昵称**懒羊羊**。
@@ -57,4 +59,34 @@
 
 - 1.26 解决第一次刷新页面不加载数据 需要点击按钮的情况
 - 1.27 增加对分页插件`pageHelper`的整合使用，完善页面总页码的显示，不需要手动赋值控制 
+
+
+
+
+
+### Wink
+
+1. 说明
+
+   基于jQuery操作，完成内容在html页面上键盘输出的效果
+
+2. 用法
+
+   ```html
+                           <div class="row text-center">
+                                  
+                                   <div id="content" class="hidden">To be continued...</div>
+                                   <p class="m-nav-tobecontinued " style="width: 100%;" id="show"></p>
+                                  
+                           </div>
+   ```
+
+   ```js
+   $.wink("#content","#show",true);
+   //第一个参数为要展示的内容，将其设置成hidden
+   //第二个参数为展示内容的区域
+   //第三个参数为内容是否需要一个个字输出在页面上
+   ```
+
+   
 
